@@ -1,9 +1,10 @@
 import React from "react";
-import { ConnectedUserPopout } from "@vizality/components";
+import { Anonymous } from "@vizality/components";
 import { getModule, getModuleByDisplayName } from "@vizality/webpack";
 import { patch, unpatch } from "@vizality/patcher";
 import { Plugin } from "@vizality/entities";
 import { get } from "@vizality/http";
+import { findInReactTree, forceUpdateElement, getOwnerInstance, waitForElement } from '@vizality/util/react';
 
 export default class VzPronouns extends Plugin {
     patches = [];
@@ -37,6 +38,14 @@ export default class VzPronouns extends Plugin {
                     console.log("Pronouns for user " + id + ": " + result);
                 
                 if (result === null) return result;
+
+                const container = getModule(m => m.props?.className == "body-3iLsc4").props.children[0].props.children[0];
+
+                container.props.children[0].splice(1,0,
+                    <Anonymous
+                        className="popout-pronouns"
+                    />
+                );
 
                 return result;
             });
