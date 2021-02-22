@@ -1,0 +1,10 @@
+{
+    "name": "VZ Pronouns",
+    "description": "Adds pronouns to Discord. Service by pronoundb.org",
+    "author": {
+        "name": "Yellowsink#8156",
+        "id": "435026627907420161"
+    },
+    "version": "1.0.0",
+    "license": "BSD-3"
+}
