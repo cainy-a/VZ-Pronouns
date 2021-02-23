@@ -10,21 +10,31 @@ export default class VzPronouns extends Plugin {
 
 
 	start() {
+        this.EndPointUrl = "https://pronoundb.org/api/v1/lookup";
+        
+
         InjectScript("https://code.jquery.com/jquery-3.5.1.slim.min.js", "jquery");
+        this.log("Injected jQuery");
 
 		this.injectStyles("stylesheet.scss");
-
-        this.EndPointUrl = "https://pronoundb.org/api/v1/lookup";
+        this.log("Injected stylesheet");
 
         this._patchUserPopout();
+        this.log("Completed initialisation")
 	}
 
 	stop() {
+        RemoveScript("jquery");
+        this.log("Removed injected jQuery");
+
 		unpatch("user-popout-pronouns");
         unpatch("pronouns-get-user-popout");
-
-        RemoveScript("jquery");
+        this.log("Plugin unloading complete");
 	}
+
+    async _patchProfile() {
+        
+    }
 
 	async _patchUserPopout() {
         this.patches.push(() => unpatch("user-popout-pronouns"));
@@ -45,13 +55,24 @@ export default class VzPronouns extends Plugin {
 
                 $(".popout-pronouns").remove(); // stop it making tons of pronoun elements
 
-                if (result === undefined) result = "Not registered with PronounDB";
+                if (result === undefined) result = "Not registered with PronounDB"; // User friendliness
 
+                const diskaiCompact = getDiskaiPluginHook("compact") == 1; // Diskai compact mode
+
+                // insert pronouns into popout
                 let container = $(".bodyInnerWrapper-Z8WDxe");
-
-                let newElement = $(`<div class=\"popout-pronouns\">${result}</div>`);
-
+                let classes = diskaiCompact ? "popout-pronouns compact" : "popout-pronouns";
+                let newElement = $(`<div class=\"${classes}\">${result}</div>`);
                 newElement.prependTo(container);
+
+                // fix popout going slightly off the bottom of the screen
+                const popoutRoot = $(".layer-v9HyYc");
+                let verticalPos = popoutRoot.css("top"); // get Discord's assigned top value
+                verticalPos = parseInt(verticalPos); // remove the "px" and convert to int
+                verticalPos -= (13 + 15 - 8 ); // Remove height used by pronouns info
+                if (!diskaiCompact) verticalPos -= (12 + 12); // compensate for Diskai compact mode
+                verticalPos += "px"; // Add "px" back
+                popoutRoot.css("top", verticalPos); // insert back into style=""
 
                 return result;
             });
@@ -154,4 +175,10 @@ function RemoveScript(name) {
     document.getElementsByTagName("head")[0].childNodes.forEach(element => {
         if (element.id === "pronouns-injected-" + name) element.remove();
     });
+}
+
+function getDiskaiPluginHook(hookName) {
+    return getComputedStyle(document.getElementById("app-mount")) // get :root {}
+        .getPropertyValue(`--diskai-hook-${hookName}`) // get the hook
+        .trim(); // remove leading whitespace
 }
