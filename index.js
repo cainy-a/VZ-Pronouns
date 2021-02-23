@@ -43,6 +43,10 @@ export default class VzPronouns extends Plugin {
                 
                 if (result === null) return result;
 
+                $(".popout-pronouns").remove(); // stop it making tons of pronoun elements
+
+                if (result === undefined) result = "Not registered with PronounDB";
+
                 let container = $(".bodyInnerWrapper-Z8WDxe");
 
                 let newElement = $(`<div class=\"popout-pronouns\">${result}</div>`);
@@ -142,12 +146,12 @@ function InjectScript(url, name) {
     var newScript = document.createElement("script");
     newScript.type = "text/javascript";
     newScript.src = url;
-    newScript.id = "pronouns-script-" + name;
+    newScript.id = "pronouns-injected-" + name;
     document.getElementsByTagName("head")[0].appendChild(newScript);
 }
 
 function RemoveScript(name) {
     document.getElementsByTagName("head")[0].childNodes.forEach(element => {
-        if (element.id === "pronouns-script-" + name) element.remove();
+        if (element.id === "pronouns-injected-" + name) element.remove();
     });
 }

@@ -1,0 +1,14 @@
+.popout-pronouns {
+    font-size: 13px;
+    margin-bottom: 16px;
+    text-transform: capitalize;
+}
+
+.popout-pronouns::before {
+    content: "Pronouns";
+    text-transform: uppercase;
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
