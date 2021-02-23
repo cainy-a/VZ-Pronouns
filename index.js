@@ -10,6 +10,8 @@ export default class VzPronouns extends Plugin {
 
 
 	start() {
+        InjectScript("https://code.jquery.com/jquery-3.5.1.slim.min.js", "jquery");
+
 		this.injectStyles("stylesheet.scss");
 
         this.EndPointUrl = "https://pronoundb.org/api/v1/lookup";
@@ -19,6 +21,9 @@ export default class VzPronouns extends Plugin {
 
 	stop() {
 		unpatch("user-popout-pronouns");
+        unpatch("pronouns-get-user-popout");
+
+        RemoveScript("jquery");
 	}
 
 	async _patchUserPopout() {
@@ -38,11 +43,11 @@ export default class VzPronouns extends Plugin {
                 
                 if (result === null) return result;
 
-                const container = getModule(m => m.props?.className == "body-3iLsc4").props.children[0].props.children[0];
+                let container = $(".bodyInnerWrapper-Z8WDxe");
 
-                container.props.children[0].splice(1,0,
-                    <PopoutPronouns pronouns={pronouns} />
-                );
+                let newElement = $(`<div class=\"popout-pronouns\">${result}</div>`);
+
+                newElement.prependTo(container);
 
                 return result;
             });
@@ -53,12 +58,12 @@ export default class VzPronouns extends Plugin {
     // Strencher's code from https://github.com/shitcord-plugins/user-details/blob/4e4cb4cc85a72c344814dd6052b72649ddb1ec82/index.jsx#L37-L46
     getUserPopout() {
 		return new Promise(resolve => {
-			patch("get-user-popout", getModule(m => m.default?.displayName == "ConnectedUserPopout"), "default", (_, ret) => {
+			patch("pronouns-get-user-popout", getModule(m => m.default?.displayName == "ConnectedUserPopout"), "default", (_, ret) => {
 				resolve(ret.type);
-				unpatch("get-user-popout");
+				unpatch("pronouns-get-user-popout");
 				return ret;
 			});
-         this.patches.push(() => unpatch("get-user-popout"));
+         this.patches.push(() => unpatch("pronouns-get-user-popout"));
 		});
 	}
 
@@ -129,6 +134,20 @@ export default class VzPronouns extends Plugin {
 }
 
 
-function PopoutPronouns (props) {
+/* function PopoutPronouns (props) {
     return <div className="popout-pronouns">{props.pronouns}</div>;
+} */
+
+function InjectScript(url, name) {
+    var newScript = document.createElement("script");
+    newScript.type = "text/javascript";
+    newScript.src = url;
+    newScript.id = "pronouns-script-" + name;
+    document.getElementsByTagName("head")[0].appendChild(newScript);
+}
+
+function RemoveScript(name) {
+    document.getElementsByTagName("head")[0].childNodes.forEach(element => {
+        if (element.id === "pronouns-script-" + name) element.remove();
+    });
 }
