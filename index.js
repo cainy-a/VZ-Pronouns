@@ -1,15 +1,17 @@
 import React from "react";
-import { ConnectedUserPopout } from "@vizality/components";
 import { getModule, getModuleByDisplayName } from "@vizality/webpack";
 import { patch, unpatch } from "@vizality/patcher";
 import { Plugin } from "@vizality/entities";
 import { get } from "@vizality/http";
+import { findInReactTree, forceUpdateElement, getOwnerInstance, waitForElement } from '@vizality/util/react';
 
 export default class VzPronouns extends Plugin {
     patches = [];
 
 
 	start() {
+        InjectScript("https://code.jquery.com/jquery-3.5.1.slim.min.js", "jquery");
+
 		this.injectStyles("stylesheet.scss");
 
         this.EndPointUrl = "https://pronoundb.org/api/v1/lookup";
@@ -19,6 +21,9 @@ export default class VzPronouns extends Plugin {
 
 	stop() {
 		unpatch("user-popout-pronouns");
+        unpatch("pronouns-get-user-popout");
+
+        RemoveScript("jquery");
 	}
 
 	async _patchUserPopout() {
@@ -38,6 +43,16 @@ export default class VzPronouns extends Plugin {
                 
                 if (result === null) return result;
 
+                $(".popout-pronouns").remove(); // stop it making tons of pronoun elements
+
+                if (result === undefined) result = "Not registered with PronounDB";
+
+                let container = $(".bodyInnerWrapper-Z8WDxe");
+
+                let newElement = $(`<div class=\"popout-pronouns\">${result}</div>`);
+
+                newElement.prependTo(container);
+
                 return result;
             });
             return res;
@@ -47,12 +62,12 @@ export default class VzPronouns extends Plugin {
     // Strencher's code from https://github.com/shitcord-plugins/user-details/blob/4e4cb4cc85a72c344814dd6052b72649ddb1ec82/index.jsx#L37-L46
     getUserPopout() {
 		return new Promise(resolve => {
-			patch("get-user-popout", getModule(m => m.default?.displayName == "ConnectedUserPopout"), "default", (_, ret) => {
+			patch("pronouns-get-user-popout", getModule(m => m.default?.displayName == "ConnectedUserPopout"), "default", (_, ret) => {
 				resolve(ret.type);
-				unpatch("get-user-popout");
+				unpatch("pronouns-get-user-popout");
 				return ret;
 			});
-         this.patches.push(() => unpatch("get-user-popout"));
+         this.patches.push(() => unpatch("pronouns-get-user-popout"));
 		});
 	}
 
@@ -61,23 +76,11 @@ export default class VzPronouns extends Plugin {
     }
 
 	async _queryUser(id) {
-		let queryUrl = this.EndPointUrl + "%3Fplatform=discord%26id=" + id;
-		let result = "";
-
-		/* var xmlhttp = new XMLHttpRequest();
-		xmlhttp.onreadystatechange = function () {
-			if (this.readyState == 4 && this.status == 200) {
-				resultText = this.responseText;
-			}
-		};
-		xmlhttp.open("GET", queryUrl, true);
-		xmlhttp.send(); */
-
-        try {
+		try {
             let request = get(this.EndPointUrl);
             request.query("platform", "discord");
             request.query("id", id);
-            result = await request.execute();
+            let result = await request.execute();
     
             return result.body.pronouns;
         }
@@ -132,4 +135,23 @@ export default class VzPronouns extends Plugin {
                 return "Avoid, use my name";
         }
     }
+}
+
+
+/* function PopoutPronouns (props) {
+    return <div className="popout-pronouns">{props.pronouns}</div>;
+} */
+
+function InjectScript(url, name) {
+    var newScript = document.createElement("script");
+    newScript.type = "text/javascript";
+    newScript.src = url;
+    newScript.id = "pronouns-injected-" + name;
+    document.getElementsByTagName("head")[0].appendChild(newScript);
+}
+
+function RemoveScript(name) {
+    document.getElementsByTagName("head")[0].childNodes.forEach(element => {
+        if (element.id === "pronouns-injected-" + name) element.remove();
+    });
 }
