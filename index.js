@@ -1,5 +1,4 @@
 import React from "react";
-import { Anonymous } from "@vizality/components";
 import { getModule, getModuleByDisplayName } from "@vizality/webpack";
 import { patch, unpatch } from "@vizality/patcher";
 import { Plugin } from "@vizality/entities";
@@ -42,9 +41,7 @@ export default class VzPronouns extends Plugin {
                 const container = getModule(m => m.props?.className == "body-3iLsc4").props.children[0].props.children[0];
 
                 container.props.children[0].splice(1,0,
-                    <Anonymous
-                        className="popout-pronouns"
-                    />
+                    <PopoutPronouns pronouns={pronouns} />
                 );
 
                 return result;
@@ -70,23 +67,11 @@ export default class VzPronouns extends Plugin {
     }
 
 	async _queryUser(id) {
-		let queryUrl = this.EndPointUrl + "%3Fplatform=discord%26id=" + id;
-		let result = "";
-
-		/* var xmlhttp = new XMLHttpRequest();
-		xmlhttp.onreadystatechange = function () {
-			if (this.readyState == 4 && this.status == 200) {
-				resultText = this.responseText;
-			}
-		};
-		xmlhttp.open("GET", queryUrl, true);
-		xmlhttp.send(); */
-
-        try {
+		try {
             let request = get(this.EndPointUrl);
             request.query("platform", "discord");
             request.query("id", id);
-            result = await request.execute();
+            let result = await request.execute();
     
             return result.body.pronouns;
         }
@@ -141,4 +126,9 @@ export default class VzPronouns extends Plugin {
                 return "Avoid, use my name";
         }
     }
+}
+
+
+function PopoutPronouns (props) {
+    return <div className="popout-pronouns">{props.pronouns}</div>;
 }
