@@ -21,6 +21,8 @@ export default class VzPronouns extends Plugin {
 
         this._patchUserPopout();
         this.log("Completed initialisation")
+
+        console.log("This is an easy way to get to the file in the debugger");
 	}
 
 	stop() {
@@ -47,9 +49,9 @@ export default class VzPronouns extends Plugin {
 
             pronouns.then(function(result) {
                 if (result === undefined || result === null)
-                    console.log("No pronouns available for user " + id);
+                    this.log("No pronouns available for user " + id);
                 else
-                    console.log("Pronouns for user " + id + ": " + result);
+                    this.log("Pronouns for user " + id + ": " + result);
                 
                 if (result === null) return result;
 
