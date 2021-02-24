@@ -3,12 +3,8 @@ import { getModule, getModuleByDisplayName } from "@vizality/webpack";
 import { patch, unpatch } from "@vizality/patcher";
 import { Plugin } from "@vizality/entities";
 import { get } from "@vizality/http";
-import {
-	findInReactTree,
-	forceUpdateElement,
-	getOwnerInstance,
-	waitForElement,
-} from "@vizality/util/react";
+
+const Settings = require("./settings");
 
 export default class VzPronouns extends Plugin {
 	patches = [];
@@ -24,11 +20,11 @@ export default class VzPronouns extends Plugin {
 		);
 		this.log("Injected jQuery");
 
+		this.registerSettings(Settings);
+
 		this.injectStyles("stylesheet.scss");
-		this.log("Injected stylesheet");
 
 		this._patchUserPopout();
-		this.log("Completed initialisation");
 
 		console.log("This is an easy way to get to the file in the debugger");
 	}
@@ -110,7 +106,11 @@ export default class VzPronouns extends Plugin {
 
 		// insert pronouns into popout
 		let container = $(".header-2BwW8b > :first-child");
-		let newElement = $(`<div class="popout-pronouns">💬<div class="text">${pronouns}</div></div>`);
+		let newElement = null;
+		if (this.settings.get("popoutHover"))
+			newElement = $(`<div class="popout-pronouns hover">💬<div class="text">${pronouns}</div></div>`);
+		else
+			newElement = $(`<div class="popout-pronouns">${pronouns}</div>`);
 		newElement.appendTo(container);
 
 		// fix popout going slightly off the bottom of the screen

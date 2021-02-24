@@ -1,11 +1,11 @@
-.popout-pronouns {
+.popout-pronouns.hover {
 	font-size: 22px;
 	margin-top: 4px;
 	margin-bottom: 4px;
 	text-align: center;
 }
 
-.popout-pronouns .text {
+.popout-pronouns.hover .text {
 	font-size: 13px;
 	text-transform: capitalize;
 
@@ -21,7 +21,14 @@
 		height 0.17s ease;
 }
 
-.popout-pronouns:hover .text {
+.popout-pronouns.hover:hover .text {
 	opacity: 1;
 	height: 20px;
+}
+
+.popout-pronouns:not(.hover) {
+	font-size: 13px;
+	text-transform: capitalize;
+	text-align: center;
+	padding: 5px;
 }
