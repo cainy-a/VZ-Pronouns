@@ -19,6 +19,11 @@ module.exports = class Settings extends React.PureComponent {
                 value={this.props.getSetting("popoutHover", false)}
                 onChange={()=> this.props.toggleSetting("popoutHover", true)}
                 >Popout Require hover</SwitchItem>
+                <SwitchItem
+                note={"Emulate the look of the Powercord plugin."}
+                value={this.props.getSetting("pcMode", false)}
+                onChange={()=> this.props.toggleSetting("pcMode", true)}
+                >Powecord emulation mode</SwitchItem>
             </Category>
         </>
     }

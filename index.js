@@ -102,7 +102,10 @@ export default class VzPronouns extends Plugin {
 	}
 
 	injectPronounsIntoPopout(pronouns) {
-		$(".popout-pronouns").remove(); // stop it making tons of pronoun elements
+		// stop it making tons of pronoun elements
+		$(".popout-pronouns").remove();
+		$(".popout-pronouns-pc").remove();
+		$(".popout-pronouns-pc-header").remove();
 
 		// insert pronouns into popout
 		let container = $(".header-2BwW8b > :first-child");
@@ -111,7 +114,14 @@ export default class VzPronouns extends Plugin {
 			newElement = $(`<div class="popout-pronouns hover">💬<div class="text">${pronouns}</div></div>`);
 		else
 			newElement = $(`<div class="popout-pronouns">${pronouns}</div>`);
-		newElement.appendTo(container);
+
+		if (this.settings.get("pcMode")) {
+			let pcContainer = $(".bodyInnerWrapper-Z8WDxe");
+			$("<div class=\"bodyTitle-Y0qMQz marginBottom8-AtZOdT size12-3R0845 popout-pronouns-pc-header\">Pronouns</div>").appendTo(pcContainer);
+			$(`<div class="marginBottom8-AtZOdT size14-e6ZScH popout-pronouns-pc">${pronouns}</div>`).appendTo(pcContainer);
+		}
+		else
+			newElement.appendTo(container);
 
 		// fix popout going slightly off the bottom of the screen
 		const popoutRoot = $(".layer-v9HyYc");
