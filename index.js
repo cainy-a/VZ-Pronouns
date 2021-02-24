@@ -53,41 +53,40 @@ export default class VzPronouns extends Plugin {
 			UserPopout.prototype,
 			"renderHeader",
 			(_, res) => {
+				const parent = this;
+
 				const id = res.props.children[1].props.user.id;
 
-				let cached = null;
+				let cached = false;
 
 				this.cachedPronouns.forEach((element) => {
-					if (element.user === id) cached = element.pronouns;
+					if (element.user === id) //cached = element.pronouns;
+						parent.injectPronounsIntoPopout(parent._getFriendlyPronounString(element.pronouns));
 				});
 
-				if (cached !== null) {
-					this.injectPronounsIntoPopout(cached);
-					return res;
-				}
-
-				const promiseParent = this;
+				if (cached) return res;
+				
 				this._queryUser(id).then(function (result) {
-					let friendlyResult = promiseParent._getFriendlyPronounString(
+					let friendlyResult = parent._getFriendlyPronounString(
 						result
 					);
 
 					if (friendlyResult === undefined || friendlyResult === null)
-						promiseParent.log(
+						parent.log(
 							"No pronouns available for user " + id
 						);
 					else
-						promiseParent.log(
+						parent.log(
 							"Pronouns for user " + id + ": " + friendlyResult
 						);
 
 					if (friendlyResult === undefined || friendlyResult === null)
 						friendlyResult = "Not registered with PronounDB"; // User friendliness
 
-					promiseParent.injectPronounsIntoPopout(friendlyResult);
+					parent.injectPronounsIntoPopout(friendlyResult);
 
 					if (result === undefined || result === null) return res;
-					promiseParent.cachedPronouns.push({
+					parent.cachedPronouns.push({
 						user: id,
 						pronouns: result,
 					});
@@ -96,7 +95,7 @@ export default class VzPronouns extends Plugin {
 					// and yes, this is my bad attempt at preventing a memory leak.
 					// 10 minutes => 600 seconds => 600,000 milliseconds
 					setTimeout(function () {
-						removeCachedPronoun(promiseParent.id);
+						parent.removeCachedPronoun(parent.id);
 					}, 10 * 60 * 1000);
 
 					return res;
