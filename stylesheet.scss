@@ -1,18 +1,27 @@
 .popout-pronouns {
+	font-size: 22px;
+	margin-top: 4px;
+	margin-bottom: 4px;
+	text-align: center;
+}
+
+.popout-pronouns .text {
 	font-size: 13px;
-	margin-bottom: 16px;
 	text-transform: capitalize;
 
-	&:not(.compact)::before {
-		content: "Pronouns";
-		text-transform: uppercase;
-		display: block;
-		font-size: 12px;
-		font-weight: 700;
-		margin-bottom: 12px;
-	}
+	opacity: 0;
+	width: auto;
+	text-align: center;
+	padding: 5px;
+	border-radius: 6px;
 
-    &.compact {
-        text-align: center;
-    }
+	height: 0;
+
+	transition: opacity 0.3s ease,
+		height 0.17s ease;
+}
+
+.popout-pronouns:hover .text {
+	opacity: 1;
+	height: 20px;
 }

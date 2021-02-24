@@ -108,22 +108,16 @@ export default class VzPronouns extends Plugin {
 	injectPronounsIntoPopout(pronouns) {
 		$(".popout-pronouns").remove(); // stop it making tons of pronoun elements
 
-		const diskaiCompact = getDiskaiPluginHook("compact") == 1; // Diskai compact mode
-
 		// insert pronouns into popout
-		let container = $(".bodyInnerWrapper-Z8WDxe");
-		let classes = diskaiCompact
-			? "popout-pronouns compact"
-			: "popout-pronouns";
-		let newElement = $(`<div class=\"${classes}\">${pronouns}</div>`);
-		newElement.prependTo(container);
+		let container = $(".header-2BwW8b > :first-child");
+		let newElement = $(`<div class="popout-pronouns">💬<div class="text">${pronouns}</div></div>`);
+		newElement.appendTo(container);
 
 		// fix popout going slightly off the bottom of the screen
 		const popoutRoot = $(".layer-v9HyYc");
 		let verticalPos = popoutRoot.css("top"); // get Discord's assigned top value
 		verticalPos = parseInt(verticalPos); // remove the "px" and convert to int
-		verticalPos -= 13 + 15 - 8; // Remove height used by pronouns info
-		if (!diskaiCompact) verticalPos -= 12 + 12; // compensate for Diskai compact mode
+		verticalPos -= 57; // Remove height used by pronouns info
 		verticalPos += "px"; // Add "px" back
 		popoutRoot.css("top", verticalPos); // insert back into style=""
 	}
