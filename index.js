@@ -47,11 +47,12 @@ export default class VzPronouns extends Plugin {
 
             const pronouns = this._queryUserFriendly(id);
 
+            const promiseParent = this;
             pronouns.then(function(result) {
                 if (result === undefined || result === null)
-                    this.log("No pronouns available for user " + id);
+                    promiseParent.log("No pronouns available for user " + id);
                 else
-                    this.log("Pronouns for user " + id + ": " + result);
+                    promiseParent.log("Pronouns for user " + id + ": " + result);
                 
                 if (result === null) return result;
 
