@@ -3,6 +3,7 @@ import { getModule, getModuleByDisplayName } from "@vizality/webpack";
 import { patch, unpatch } from "@vizality/patcher";
 import { Plugin } from "@vizality/entities";
 import { get } from "@vizality/http";
+import { userProfile } from "./fluxhack";
 
 const Settings = require("./settings");
 
@@ -25,6 +26,7 @@ export default class VzPronouns extends Plugin {
 		this.injectStyles("stylesheet.scss");
 
 		this._patchUserPopout();
+		this._patchProfile();
 
 		console.log("This is an easy way to get to the file in the debugger");
 	}
@@ -35,10 +37,23 @@ export default class VzPronouns extends Plugin {
 
 		unpatch("user-popout-pronouns");
 		unpatch("pronouns-get-user-popout");
+		unpatch("user-profile-pronouns")
+		unpatch("pronouns-get-user-profile");
 		this.log("Plugin unloading complete");
 	}
 
-	async _patchProfile() {}
+	async _patchProfile() {
+		this.patches.push(() => unpatch("user-profile-pronouns"));
+		const UserProfile = //await this.getUserProfile();
+			userProfile();
+
+		console.log(UserProfile);
+
+		patch("user-profile-pronouns", UserProfile.prototype, "render", (_, res) => {
+			console.log("patched profile! :)");
+			return res;
+		});
+	}
 
 	async _patchUserPopout() {
 		this.patches.push(() => unpatch("user-popout-pronouns"));
@@ -61,7 +76,7 @@ export default class VzPronouns extends Plugin {
 				});
 
 				if (cached) return res;
-				
+
 				this._queryUser(id).then(function (result) {
 					let friendlyResult = parent._getFriendlyPronounString(
 						result
@@ -163,6 +178,24 @@ export default class VzPronouns extends Plugin {
 				}
 			);
 			this.patches.push(() => unpatch("pronouns-get-user-popout"));
+		});
+	}
+
+	getUserProfile() {
+		return new Promise((resolve) => {
+			patch(
+				"pronouns-get-user-profile",
+				getModule(
+					(m) => m.default?.displayName == "UserProfile"
+				),
+				"default",
+				(_, ret) => {
+					resolve(ret.type);
+					unpatch("pronouns-get-user-profile");
+					return ret;
+				}
+			);
+			this.patches.push(() => unpatch("pronouns-get-user-profile"));
 		});
 	}
 
